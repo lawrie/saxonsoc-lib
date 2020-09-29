@@ -2,9 +2,12 @@
 #include "spi.h"
 #include "ssd1331.h"
 #include <stdio.h>
+#include <string.h>
 
 #define DC 26
 #define RST 27
+
+unsigned char buffer[OLED_WIDTH * OLED_HEIGHT * 2];
 
 static void command(unsigned char cmd) {
   digitalWrite(DC, LOW);
@@ -72,4 +75,36 @@ void SSD1331Begin() {
   command(0x3E);
   command(DEACTIVE_SCROLLING);           //Disable scrolling
   command(NORMAL_BRIGHTNESS_DISPLAY_ON); //Set display on
+}
+
+void SSD1331Clear(int color) {
+  memset(buffer,color,sizeof(buffer));
+}
+
+void SSD1331Display() {
+  int txLen = 512;
+  int remain = sizeof(buffer);
+  unsigned char *pBuffer = buffer;
+
+  command(SET_COLUMN_ADDRESS);
+  command(0);               //column start address
+  command(OLED_WIDTH - 1);  //column end address
+  command(SET_ROW_ADDRESS);
+  command(0);               //page atart address
+  command(OLED_HEIGHT - 1); //page end address
+  digitalWrite(DC, HIGH);
+  
+  while (remain > txLen) {
+    spiWrite(pBuffer, txLen);
+    remain -= txLen;
+    pBuffer += txLen;
+  }
+  spiWrite(pBuffer, remain);
+}
+
+
+void SSD1331DrawPixel(int x, int y, unsigned short hwColor) {
+  if(x >= OLED_WIDTH || y >= OLED_HEIGHT) return;
+  buffer[x * 2 + y * OLED_WIDTH * 2] = hwColor >> 8;
+  buffer[x * 2 + y * OLED_WIDTH * 2 + 1] = hwColor;
 }

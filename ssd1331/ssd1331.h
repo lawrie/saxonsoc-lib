@@ -1,3 +1,6 @@
+#define OLED_WIDTH  96
+#define OLED_HEIGHT 64
+
 #define DRAW_LINE                       0x21
 #define DRAW_RECTANGLE                  0x22
 #define COPY_WINDOW                     0x23
@@ -40,4 +43,9 @@
 #define SET_PRECHARGE_VOLTAGE           0xBB
 
 #define SET_V_VOLTAGE                   0xBE
+
+extern void SSD1331Begin(void);
+extern void SSD1331Clear(int color);
+extern void SSD1331Display(void);
+extern void SSD1331DrawPixel(int x, int y, unsigned short hwColor);
 

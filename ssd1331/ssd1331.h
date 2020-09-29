@@ -49,3 +49,6 @@ extern void SSD1331Clear(int color);
 extern void SSD1331Display(void);
 extern void SSD1331DrawPixel(int x, int y, unsigned short hwColor);
 
+extern void SSD1331String(unsigned char x, unsigned char y, const char *pString,
+                          unsigned short hwColor);
+

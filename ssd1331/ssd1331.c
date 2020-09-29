@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "font1608.h"
+
 #define DC 26
 #define RST 27
 
@@ -107,4 +109,43 @@ void SSD1331DrawPixel(int x, int y, unsigned short hwColor) {
   if(x >= OLED_WIDTH || y >= OLED_HEIGHT) return;
   buffer[x * 2 + y * OLED_WIDTH * 2] = hwColor >> 8;
   buffer[x * 2 + y * OLED_WIDTH * 2 + 1] = hwColor;
+}
+
+static void SSD1331Char(unsigned char x, unsigned char y, char acsii, unsigned short hwColor) {
+  unsigned char i, j, y0=y;
+  char temp;
+  unsigned char ch = acsii - ' ';
+  
+  for(i = 0;i<16;i++) {
+    temp = Font1608[ch][i];
+    for(j =0;j<8;j++) {
+      if(temp & 0x80) SSD1331DrawPixel(x, y, hwColor);
+      else SSD1331DrawPixel(x, y, 0);
+      temp <<=1;
+      y++;
+      if ((y-y0)==16) {
+        y = y0;
+        x ++;
+        break;
+      }
+    }
+  }
+}
+
+
+void SSD1331String(unsigned char x, unsigned char y, const char *pString, 
+                   unsigned short hwColor) {
+  while (*pString != '\0') {       
+    if (x > (OLED_WIDTH - 8)) {
+      x = 0;
+      y += 16;
+      if (y > (OLED_HEIGHT - 16)) {
+        y = x = 0;
+      }
+    }
+        
+    SSD1331Char(x, y, *pString, hwColor);
+    x += 8;
+    pString ++;
+  }
 }
